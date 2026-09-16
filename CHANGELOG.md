@@ -29,6 +29,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **Release workflow no longer persists a write-scoped git credential across `npm ci`.** The release job declares `contents: write`, which overrides this repo's read-only default workflow permission, so `actions/checkout`'s default persisted credential was write-scoped and lived in `.git/config` through dependency install and build — readable by any compromised dependency lifecycle script. `persist-credentials: false` is semantic-release's own documented GitHub Actions recipe; it authenticates its pushes from `GITHUB_TOKEN` directly and never needed the persisted credential. (CWE-250)
+
 ### Fixed
 
 - Stop tracking `node_modules/` and `dist/` in git; both are now ignored as intended.
