@@ -32,6 +32,7 @@
 ### Changed
 
 - **Release workflow no longer persists a write-scoped git credential across `npm ci`.** The release job declares `contents: write`, which overrides this repo's read-only default workflow permission, so `actions/checkout`'s default persisted credential was write-scoped and lived in `.git/config` through dependency install and build — readable by any compromised dependency lifecycle script. `persist-credentials: false` is semantic-release's own documented GitHub Actions recipe; it authenticates its pushes from `GITHUB_TOKEN` directly and never needed the persisted credential. (CWE-250)
+- **Release workflow no longer writes the write-scoped `GITHUB_TOKEN` into `.npmrc` before `npm ci`/build.** This package has zero `@wyre-ai` dependencies, so install and build never needed GitHub Packages registry auth; the `.npmrc` write now happens immediately before the one step that does (`npx semantic-release`), closing the window where the token sat on disk through dependency install.
 
 ### Fixed
 
