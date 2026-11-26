@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest';
+import { http, HttpResponse } from 'msw';
+import { server } from '../mocks/server.js';
 import { HuntressClient } from '../../src/index.js';
 
 const client = new HuntressClient({ apiKey: 'test-key', apiSecret: 'test-secret' });
@@ -27,6 +29,22 @@ describe('HuntressClient', () => {
       const result = await client.agents.list();
       expect(result.agents).toHaveLength(2);
       expect(result.agents[0].hostname).toBe('WORKSTATION-1');
+    });
+
+    it('reads JSON with a mixed-case media type and parameters', async () => {
+      server.use(http.get('*/v1/agents/7', () =>
+        HttpResponse.json({ agent: { id: 7, hostname: 'fixture' } }, {
+          headers: { 'Content-Type': 'Application/JSON; charset=utf-8' },
+        })
+      ));
+      expect(await client.agents.get(7)).toEqual({ id: 7, hostname: 'fixture' });
+    });
+
+    it('ignores a non-JSON response with application/json in a parameter', async () => {
+      server.use(http.get('*/v1/agents', () => new HttpResponse('fixture text', {
+        headers: { 'Content-Type': 'text/plain; note="application/json"' },
+      })));
+      expect(await client.agents.list()).toEqual({});
     });
 
     it('should get agent by id', async () => {
