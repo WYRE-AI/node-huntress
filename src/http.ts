@@ -90,8 +90,8 @@ export class HttpClient {
 
       if (response.ok) {
         if (response.status === 204) return {} as T;
-        const contentType = response.headers.get('content-type');
-        if (contentType?.includes('application/json')) return response.json() as Promise<T>;
+        const mediaType = response.headers.get('content-type')?.split(';', 1)[0].trim().toLowerCase();
+        if (mediaType === 'application/json') return response.json() as Promise<T>;
         return {} as T;
       }
 
